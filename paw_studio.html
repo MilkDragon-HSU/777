@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PAW STUDIO | 寵物居家美學與生活風格品牌</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        cream: '#FDFBF7',
+                        sand: '#F5EFE6',
+                        'milk-tea': '#E8DFD8',
+                        espresso: '#362E2B',
+                        sage: '#8A9A86',
+                        'sage-light': '#EBF0EA',
+                        'sage-dark': '#687765'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'PingFang TC', 'Microsoft JhengHei', 'sans-serif'],
+                        serif: ['Playfair Display', 'Noto Serif TC', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;1,400&display=swap" rel="stylesheet">
+    
+    <!-- GSAP & ScrollTrigger -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+    <style>
+        body {
+            background-color: #FDFBF7;
+            color: #362E2B;
+            font-family: 'Inter', 'PingFang TC', sans-serif;
+            overflow-x: hidden;
+        }
+        .backdrop-blur-md {
+            backdrop-filter: blur(12px);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #F5EFE6;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #8A9A86;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col selection:bg-sage selection:text-white">
+
+    <!-- Toast Notification System -->
+    <div id="toast" class="fixed top-24 right-5 z-50 transform translate-x-72 opacity-0 transition-all duration-300 pointer-events-none flex items-center gap-3 bg-espresso text-cream px-5 py-3.5 rounded-2xl shadow-xl">
+        <i id="toast-icon" class="fa-solid fa-circle-check text-sage text-lg"></i>
+        <span id="toast-msg" class="text-sm font-medium">已加入購物車</span>
+    </div>
+
+    <!-- Navigation Bar -->
+    <header id="navbar" class="fixed top-0 left-0 w-full z-40 transition-all duration-300 bg-cream/90 backdrop-blur-md border-b border-milk-tea/40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <!-- Brand Logo -->
+            <a href="#home" onclick="navigateTo('home'); return false;" class="group flex items-center gap-2">
+                <span class="w-9 h-9 rounded-full bg-sage text-cream flex items-center justify-center font-serif text-xl font-bold group-hover:scale-105 transition-transform">P</span>
+                <span class="font-serif tracking-widest text-xl sm:text-2xl font-bold text-espresso">PAW STUDIO</span>
+            </a>
+
+            <!-- Desktop Nav Links -->
+            <nav class="hidden md:flex items-center gap-8">
+                <a href="#home" onclick="navigateTo('home'); return false;" class="nav-link active text-sm font-medium text-espresso hover:text-sage transition-colors relative py-1">HOME</a>
+                <a href="#about" onclick="navigateTo('about'); return false;" class="nav-link text-sm font-medium text-espresso/70 hover:text-sage transition-colors relative py-1">ABOUT</a>
+                <a href="#products" onclick="navigateTo('products'); return false;" class="nav-link text-sm font-medium text-espresso/70 hover:text-sage transition-colors relative py-1">PRODUCTS</a>
+                <a href="#lifestyle" onclick="navigateTo('lifestyle'); return false;" class="nav-link text-sm font-medium text-espresso/70 hover:text-sage transition-colors relative py-1">LIFESTYLE</a>
+                <a href="#contact" onclick="navigateTo('contact'); return false;" class="nav-link text-sm font-medium text-espresso/70 hover:text-sage transition-colors relative py-1">CONTACT</a>
+            </nav>
+
+            <!-- Actions (Search, Favorites, Cart) -->
+            <div class="flex items-center gap-3 sm:gap-4">
+                <button onclick="openSearchModal()" aria-label="搜尋商品" class="w-10 h-10 rounded-full flex items-center justify-center hover:bg-sand transition-colors text-espresso">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </button>
+                <button onclick="openFavoritesModal()" aria-label="收藏商品" class="w-10 h-10 rounded-full flex items-center justify-center hover:bg-sand transition-colors text-espresso relative">
+                    <i class="fa-regular fa-heart"></i>
+                    <span id="fav-count" class="absolute -top-1 -right-1 w-5 h-5 bg-sage text-white text-[10px] font-bold rounded-full flex items-center justify-center opacity-0 scale-0 transition-all">0</span>
+                </button>
+                <button onclick="toggleCartDrawer(true)" aria-label="購物車" class="w-10 h-10 rounded-full flex items-center justify-center bg-espresso text-cream hover:bg-sage transition-colors relative shadow-sm">
+                    <i class="fa-solid fa-bag-shopping"></i>
+                    <span id="cart-count" class="absolute -top-1 -right-1 w-5 h-5 bg-sage text-white text-[10px] font-bold rounded-full flex items-center justify-center opacity-0 scale-0 transition-all">0</span>
+                </button>
+                <!-- Mobile Hamburger Button -->
+                <button id="hamburger" onclick="toggleMobileMenu()" aria-label="切換選單" class="md:hidden w-10 h-10 flex flex-col items-center justify-center gap-1.5 text-espresso">
+                    <span class="line-1 w-6 h-0.5 bg-espresso transition-all duration-300"></span>
+                    <span class="line-2 w-6 h-0.5 bg-espresso transition-all duration-300"></span>
+                    <span class="line-3 w-6 h-0.5 bg-espresso transition-all duration-300"></span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Menu Overlay -->
+        <div id="mobile-menu" class="hidden md:hidden bg-cream border-b border-milk-tea px-6 py-6 flex flex-col gap-4 shadow-lg">
+            <a href="#home" onclick="navigateTo('home'); toggleMobileMenu(); return false;" class="text-lg font-medium text-espresso hover:text-sage">首頁 HOME</a>
+            <a href="#about" onclick="navigateTo('about'); toggleMobileMenu(); return false;" class="text-lg font-medium text-espresso hover:text-sage">品牌理念 ABOUT</a>
+            <a href="#products" onclick="navigateTo('products'); toggleMobileMenu(); return false;" class="text-lg font-medium text-espresso hover:text-sage">全系列選品 PRODUCTS</a>
+            <a href="#lifestyle" onclick="navigateTo('lifestyle'); toggleMobileMenu(); return false;" class="text-lg font-medium text-espresso hover:text-sage">生活風格 LIFESTYLE</a>
+            <a href="#contact" onclick="navigateTo('contact'); toggleMobileMenu(); return false;" class="text-lg font-medium text-espresso hover:text-sage">聯絡我們 CONTACT</a>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT CONTAINERS -->
+    <main class="flex-grow pt-20">
+
+        <!-- 1. SECTION: HOME -->
+        <section id="page-home" class="page-section min-h-[calc(100vh-5rem)] flex items-center relative py-12 lg:py-20">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+                <div class="grid lg:grid-cols-12 gap-12 lg:gap-8 items-center">
+                    
+                    <!-- Left Hero Content -->
+                    <div class="lg:col-span-6 space-y-6 lg:space-y-8 text-center lg:text-left">
+                        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-sand border border-milk-tea text-xs font-semibold tracking-wider text-sage-dark uppercase">
+                            <span class="w-2 h-2 rounded-full bg-sage animate-pulse"></span>
+                            PET LIFESTYLE & DESIGN
+                        </div>
+                        <h1 class="hero-title text-3xl sm:text-4xl lg:text-5xl font-serif leading-relaxed font-bold text-espresso">
+                            重塑寵物與居家的<br>
+                            <span class="italic font-normal text-sage text-2xl sm:text-3xl lg:text-4xl inline-block mt-3 tracking-wide">溫暖美學儀式</span>
+                        </h1>
+                        <p class="hero-desc text-base sm:text-lg text-espresso/80 max-w-xl mx-auto lg:mx-0 font-light leading-relaxed">
+                            PAW STUDIO 致力於將簡約幾何與自然質感融入毛孩用品。我們相信，好的設計不僅能提升毛孩的生活品質，更能完美融入你嚴選的家居空間。
+                        </p>
+                        <div class="hero-btn flex flex-wrap items-center justify-center lg:justify-start gap-4 pt-2">
+                            <button onclick="navigateTo('products')" class="px-8 py-4 rounded-full bg-espresso text-cream font-medium hover:bg-sage transition-all shadow-md hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 flex items-center gap-2">
+                                瀏覽選品 <i class="fa-solid fa-arrow-right text-xs"></i>
+                            </button>
+                            <button onclick="navigateTo('about')" class="px-8 py-4 rounded-full bg-sand border border-milk-tea text-espresso font-medium hover:bg-milk-tea transition-all hover:-translate-y-0.5">
+                                品牌理念
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Right Hero Image (Big Dilated Pupil Cat Photo) -->
+                    <div class="lg:col-span-6 relative">
+                        <div class="hero-img-container relative mx-auto max-w-md lg:max-w-none">
+                            <div class="aspect-[4/3] sm:aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl relative z-10 bg-sand border border-milk-tea">
+                                <img src="https://images.unsplash.com/photo-1513360371669-4adf3dd7dff8?auto=format&fit=crop&w=1200&q=80" alt="PAW STUDIO 可愛布偶貓主視覺" class="hero-img w-full h-full object-cover transform scale-100">
+                            </div>
+                            <!-- Floating Card -->
+                            <div class="absolute -top-4 -right-4 bg-cream/95 backdrop-blur border border-milk-tea p-4 rounded-2xl shadow-lg z-20 flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-full bg-sage-light flex items-center justify-center text-sage">
+                                    <i class="fa-solid fa-leaf"></i>
+                                </div>
+                                <div>
+                                    <p class="text-xs text-espresso/60 font-medium">環境友善材質</p>
+                                    <p class="text-xs font-bold text-espresso">100% Organic & Non-Toxic</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. SECTION: ABOUT -->
+        <section id="page-about" class="page-section hidden py-16 lg:py-24 bg-sand/40">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center max-w-3xl mx-auto mb-16 space-y-4">
+                    <span class="text-xs font-bold tracking-widest text-sage uppercase">OUR STORY</span>
+                    <h2 class="text-3xl sm:text-4xl font-serif font-bold text-espresso">為毛孩與家而生的設計哲學</h2>
+                    <p class="text-espresso/70 leading-relaxed">
+                        創立於 2024 年，PAW STUDIO 誕生於對寵物熱愛與現代極簡家居風格的追尋。我們拒絕繁複與突兀色彩，專注研發揉合實用功能與居家氛圍的質感用品。
+                    </p>
+                </div>
+
+                <!-- 3 Core Values -->
+                <div class="grid md:grid-cols-3 gap-8">
+                    <div class="bg-cream p-8 rounded-3xl border border-milk-tea shadow-sm space-y-4 text-center hover:shadow-md transition-shadow">
+                        <div class="w-16 h-16 rounded-2xl bg-sage-light text-sage flex items-center justify-center mx-auto text-2xl">
+                            <i class="fa-solid fa-paw"></i>
+                        </div>
+                        <h3 class="font-serif text-xl font-bold text-espresso">人寵共融設計</h3>
+                        <p class="text-sm text-espresso/70 leading-relaxed">從毛孩的人體工學到家具擺設色彩，讓每一件用品自然化為居家景致的一部分。</p>
+                    </div>
+
+                    <div class="bg-cream p-8 rounded-3xl border border-milk-tea shadow-sm space-y-4 text-center hover:shadow-md transition-shadow">
+                        <div class="w-16 h-16 rounded-2xl bg-sage-light text-sage flex items-center justify-center mx-auto text-2xl">
+                            <i class="fa-solid fa-shield-cat"></i>
+                        </div>
+                        <h3 class="font-serif text-xl font-bold text-espresso">嚴選無毒材質</h3>
+                        <p class="text-sm text-espresso/70 leading-relaxed">採用天然羊毛氈、食品級陶瓷、無漆實木與有機棉，確保無味安心使用。</p>
+                    </div>
+
+                    <div class="bg-cream p-8 rounded-3xl border border-milk-tea shadow-sm space-y-4 text-center hover:shadow-md transition-shadow">
+                        <div class="w-16 h-16 rounded-2xl bg-sage-light text-sage flex items-center justify-center mx-auto text-2xl">
+                            <i class="fa-solid fa-seedling"></i>
+                        </div>
+                        <h3 class="font-serif text-xl font-bold text-espresso">永續工藝哲學</h3>
+                        <p class="text-sm text-espresso/70 leading-relaxed">追求極致耐用度與可拆洗設計，減少頻繁更換的浪費，為地球盡一份心力。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. SECTION: PRODUCTS -->
+        <section id="page-products" class="page-section hidden py-16 lg:py-24">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                
+                <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+                    <div>
+                        <span class="text-xs font-bold tracking-widest text-sage uppercase">CURATED COLLECTION</span>
+                        <h2 class="text-3xl sm:text-4xl font-serif font-bold text-espresso mt-1">全系列商品選品</h2>
+                    </div>
+
+                    <!-- Filter Category Buttons -->
+                    <div class="flex flex-wrap items-center gap-2">
+                        <button onclick="filterProducts('all')" class="filter-btn active px-5 py-2.5 rounded-full text-xs font-medium bg-espresso text-cream transition-all">全部商品</button>
+                        <button onclick="filterProducts('cat')" class="filter-btn px-5 py-2.5 rounded-full text-xs font-medium bg-sand text-espresso hover:bg-milk-tea transition-all">貓咪專區</button>
+                        <button onclick="filterProducts('dog')" class="filter-btn px-5 py-2.5 rounded-full text-xs font-medium bg-sand text-espresso hover:bg-milk-tea transition-all">狗狗專區</button>
+                        <button onclick="filterProducts('home')" class="filter-btn px-5 py-2.5 rounded-full text-xs font-medium bg-sand text-espresso hover:bg-milk-tea transition-all">居家美學</button>
+                    </div>
+                </div>
+
+                <!-- Product Grid -->
+                <div id="product-grid" class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+                    <!-- Products injected dynamically by JS -->
+                </div>
+
+            </div>
+        </section>
+
+        <!-- 4. SECTION: LIFESTYLE -->
+        <section id="page-lifestyle" class="page-section hidden py-16 lg:py-24 bg-sand/30">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center max-w-2xl mx-auto mb-16 space-y-3">
+                    <span class="text-xs font-bold tracking-widest text-sage uppercase">PAW AT HOME</span>
+                    <h2 class="text-3xl sm:text-4xl font-serif font-bold text-espresso">寵物生活風格展演</h2>
+                    <p class="text-espresso/70 text-sm">直擊毛孩與選品在溫暖居家中的美好靈感時刻。</p>
+                </div>
+
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
+                    <div class="group relative rounded-2xl overflow-hidden aspect-square bg-sand shadow-sm">
+                        <img src="https://images.unsplash.com/photo-1543852786-1cf6624b9987?auto=format&fit=crop&w=800&q=80" alt="Lifestyle 1" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                        <div class="absolute inset-0 bg-espresso/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4 text-cream">
+                            <p class="text-xs font-medium">@pawstudio_home</p>
+                        </div>
+                    </div>
+                    <div class="group relative rounded-2xl overflow-hidden aspect-square bg-sand shadow-sm">
+                        <img src="https://images.unsplash.com/photo-1537151608828-ea2b11777ee8?auto=format&fit=crop&w=800&q=80" alt="Lifestyle 2" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                        <div class="absolute inset-0 bg-espresso/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4 text-cream">
+                            <p class="text-xs font-medium">@nordic_living</p>
+                        </div>
+                    </div>
+                    <div class="group relative rounded-2xl overflow-hidden aspect-square bg-sand shadow-sm">
+                        <img src="https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&w=800&q=80" alt="Lifestyle 3" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                        <div class="absolute inset-0 bg-espresso/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4 text-cream">
+                            <p class="text-xs font-medium">@cozy_corner</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. SECTION: CONTACT -->
+        <section id="page-contact" class="page-section hidden py-16 lg:py-24">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="grid lg:grid-cols-12 gap-12">
+                    
+                    <div class="lg:col-span-5 space-y-6">
+                        <span class="text-xs font-bold tracking-widest text-sage uppercase">GET IN TOUCH</span>
+                        <h2 class="text-3xl sm:text-4xl font-serif font-bold text-espresso">期待與你分享<br>寵物生活提案</h2>
+                        <p class="text-espresso/70 text-sm leading-relaxed">
+                            對於商品選購、規格詢問或品牌合作有任何疑問？歡迎透過下方表單或直接與我們的客服團隊聯繫。
+                        </p>
+
+                        <div class="space-y-4 pt-4">
+                            <div class="flex items-start gap-4">
+                                <div class="w-10 h-10 rounded-full bg-sand flex items-center justify-center text-sage flex-shrink-0">
+                                    <i class="fa-solid fa-location-dot"></i>
+                                </div>
+                                <div>
+                                    <h4 class="text-xs font-bold text-espresso uppercase">Brand Studio</h4>
+                                    <p class="text-sm text-espresso/70">台北市大安區敦化南路二段 88 號 6 樓</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-4">
+                                <div class="w-10 h-10 rounded-full bg-sand flex items-center justify-center text-sage flex-shrink-0">
+                                    <i class="fa-solid fa-envelope"></i>
+                                </div>
+                                <div>
+                                    <h4 class="text-xs font-bold text-espresso uppercase">Email Support</h4>
+                                    <p class="text-sm text-espresso/70">hello@pawstudio.design</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Contact Form -->
+                    <div class="lg:col-span-7 bg-cream border border-milk-tea p-8 rounded-3xl shadow-sm">
+                        <form id="contact-form" onsubmit="handleContactSubmit(event)" class="space-y-6">
+                            <div>
+                                <label class="block text-xs font-bold text-espresso uppercase mb-2">姓名 Name *</label>
+                                <input type="text" id="contact-name" required placeholder="請輸入您的尊姓大名" class="w-full px-4 py-3 rounded-xl bg-sand/50 border border-milk-tea focus:outline-none focus:border-sage text-sm text-espresso">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-espresso uppercase mb-2">電子郵件 Email *</label>
+                                <input type="email" id="contact-email" required placeholder="example@domain.com" class="w-full px-4 py-3 rounded-xl bg-sand/50 border border-milk-tea focus:outline-none focus:border-sage text-sm text-espresso">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-espresso uppercase mb-2">諮詢內容 Message *</label>
+                                <textarea id="contact-message" required rows="4" placeholder="請填寫您想詢問的商品問題或建議..." class="w-full px-4 py-3 rounded-xl bg-sand/50 border border-milk-tea focus:outline-none focus:border-sage text-sm text-espresso resize-none"></textarea>
+                            </div>
+                            <button type="submit" class="w-full py-4 rounded-xl bg-espresso text-cream font-medium hover:bg-sage transition-colors shadow-md">
+                                送出一對一諮詢
+                            </button>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-espresso text-cream py-12 border-t border-espresso/20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-6 text-center md:text-left">
+            <div>
+                <span class="font-serif text-2xl font-bold tracking-widest">PAW STUDIO</span>
+                <p class="text-xs text-cream/60 mt-1">© 2026 PAW STUDIO. All Rights Reserved.</p>
+            </div>
+            <div class="flex items-center gap-6 text-cream/70 text-sm">
+                <a href="#" class="hover:text-sage transition-colors"><i class="fa-brands fa-instagram text-lg"></i></a>
+                <a href="#" class="hover:text-sage transition-colors"><i class="fa-brands fa-facebook text-lg"></i></a>
+                <a href="#" class="hover:text-sage transition-colors"><i class="fa-brands fa-pinterest text-lg"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Back to Top Floating Button -->
+    <button id="back-to-top" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" aria-label="回到頂部" class="fixed bottom-6 right-6 w-12 h-12 bg-cream border border-milk-tea text-espresso rounded-full shadow-lg flex items-center justify-center opacity-0 pointer-events-none transition-all duration-300 hover:bg-sand z-30">
+        <i class="fa-solid fa-arrow-up text-sm"></i>
+    </button>
+
+    <!-- Cart Drawer -->
+    <div id="cart-drawer-overlay" onclick="toggleCartDrawer(false)" class="fixed inset-0 bg-espresso/40 backdrop-blur-sm z-50 opacity-0 pointer-events-none transition-opacity duration-300"></div>
+    <div id="cart-drawer" class="fixed top-0 right-0 h-full w-full max-w-md bg-cream z-50 shadow-2xl transform translate-x-full transition-transform duration-300 flex flex-col">
+        <div class="p-6 border-b border-milk-tea flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-bag-shopping text-sage"></i>
+                <h3 class="font-serif font-bold text-lg text-espresso">購物車 Cart</h3>
+            </div>
+            <button onclick="toggleCartDrawer(false)" class="w-8 h-8 rounded-full hover:bg-sand flex items-center justify-center text-espresso">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <!-- Items Container -->
+        <div id="cart-items" class="flex-grow overflow-y-auto p-6 space-y-4 custom-scrollbar">
+            <!-- Dynamic Cart Content -->
+        </div>
+
+        <!-- Cart Footer -->
+        <div class="p-6 border-t border-milk-tea bg-sand/30 space-y-4">
+            <div class="flex justify-between items-center text-espresso">
+                <span class="text-sm font-medium">總計 Total</span>
+                <span id="cart-total-price" class="font-serif font-bold text-xl">NT$ 0</span>
+            </div>
+            <button onclick="triggerCheckout()" class="w-full py-4 rounded-full bg-espresso text-cream font-medium hover:bg-sage transition-colors shadow-md">
+                前往結帳區
+            </button>
+        </div>
+    </div>
+
+    <!-- Product Detail Modal -->
+    <div id="product-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-espresso/50 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="bg-cream max-w-2xl w-full rounded-3xl overflow-hidden shadow-2xl relative border border-milk-tea transform scale-95 transition-transform duration-300 max-h-[90vh] overflow-y-auto custom-scrollbar">
+            <button onclick="closeProductModal()" class="absolute top-4 right-4 z-10 w-9 h-9 rounded-full bg-cream/80 hover:bg-sand flex items-center justify-center text-espresso">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="grid md:grid-cols-2 gap-6 p-6 sm:p-8">
+                <div class="aspect-square rounded-2xl overflow-hidden bg-sand">
+                    <img id="modal-img" src="" alt="" class="w-full h-full object-cover">
+                </div>
+                <div class="flex flex-col justify-between space-y-4">
+                    <div>
+                        <span id="modal-category" class="text-xs font-bold text-sage tracking-wider uppercase">CATEGORY</span>
+                        <h3 id="modal-title" class="font-serif text-2xl font-bold text-espresso mt-1">---</h3>
+                        <p id="modal-price" class="font-serif text-xl font-bold text-espresso mt-2">NT$ 0</p>
+                        <p id="modal-desc" class="text-xs sm:text-sm text-espresso/70 mt-4 leading-relaxed">---</p>
+                    </div>
+                    <div class="pt-4 border-t border-milk-tea flex gap-3">
+                        <button id="modal-add-btn" class="flex-grow py-3.5 rounded-full bg-sand text-espresso font-bold border border-milk-tea hover:bg-milk-tea transition-colors flex items-center justify-center gap-2 text-sm">
+                            <i class="fa-solid fa-cart-plus"></i> 加入購物車
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search Modal -->
+    <div id="search-modal" class="fixed inset-0 z-50 flex items-start justify-center pt-24 p-4 bg-espresso/40 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="bg-cream max-w-lg w-full rounded-3xl p-6 shadow-2xl border border-milk-tea space-y-4">
+            <div class="flex items-center justify-between">
+                <h3 class="font-serif font-bold text-espresso">搜尋選品 Search</h3>
+                <button onclick="closeSearchModal()" class="text-espresso hover:text-sage"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <input type="text" id="search-input" oninput="handleSearch()" placeholder="輸入關鍵字（例：貓窩、餐碗、胸背帶...）" class="w-full px-4 py-3 rounded-xl bg-sand/60 border border-milk-tea focus:outline-none focus:border-sage text-sm text-espresso">
+            <div id="search-results" class="max-h-60 overflow-y-auto space-y-2 custom-scrollbar">
+                <!-- Dynamic Results -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Favorites Modal -->
+    <div id="favorites-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-espresso/40 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="bg-cream max-w-lg w-full rounded-3xl p-6 shadow-2xl border border-milk-tea space-y-4 max-h-[80vh] flex flex-col">
+            <div class="flex items-center justify-between pb-3 border-b border-milk-tea">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-heart text-red-500"></i>
+                    <h3 class="font-serif font-bold text-lg text-espresso">我的收藏清單 Favorites</h3>
+                </div>
+                <button onclick="closeFavoritesModal()" class="w-8 h-8 rounded-full hover:bg-sand flex items-center justify-center text-espresso">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div id="favorites-list" class="flex-grow overflow-y-auto space-y-3 custom-scrollbar pr-1">
+                <!-- Dynamic Favorites Content -->
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT APP LOGIC -->
+    <script>
+        // --- 1. Products Data ---
+        const productsData = [
+            {
+                id: 'p1',
+                name: '極簡北歐羊毛氈圓形貓窩',
+                category: 'cat',
+                categoryName: '貓咪專區',
+                price: 1880,
+                rating: 4.9,
+                reviews: 28,
+                image: 'https://images.unsplash.com/photo-1548767797-d8c844163c4c?auto=format&fit=crop&w=800&q=80',
+                description: '嚴選 100% 天然紐西蘭羊毛打造，一體成型保暖透氣。溫柔包覆感給予毛孩最安心的睡眠環境。'
+            },
+            {
+                id: 'p2',
+                name: '微高斜角雙入陶瓷寵物餐碗',
+                category: 'home',
+                categoryName: '居家美學',
+                price: 1250,
+                rating: 4.8,
+                reviews: 42,
+                image: 'https://images.unsplash.com/photo-1545249390-6bdfa286032f?auto=format&fit=crop&w=800&q=80',
+                description: '符合犬貓頸椎工學的 15 度傾斜角度，減少進食時的頸部負擔。高品質食品級霧面陶瓷質感。'
+            },
+            {
+                id: 'p3',
+                name: '植鞣皮革輕量胸背帶繩組',
+                category: 'dog',
+                categoryName: '狗狗專區',
+                price: 2100,
+                rating: 5.0,
+                reviews: 19,
+                image: 'https://images.unsplash.com/photo-1601758228041-f3b2795255f1?auto=format&fit=crop&w=800&q=80',
+                description: '採用義大利進口植鞣皮革與減壓車縫工藝，隨時間越用越有獨特質感與光澤。'
+            },
+            {
+                id: 'p4',
+                name: '有機棉幾何雙面寵物睡墊',
+                category: 'home',
+                categoryName: '居家美學',
+                price: 1680,
+                rating: 4.7,
+                reviews: 35,
+                image: 'https://images.unsplash.com/photo-1541599540903-216a46ca1dc0?auto=format&fit=crop&w=800&q=80',
+                description: '高彈力可拆洗抗菌棉芯，雙面莫蘭迪色系配搭，輕鬆融入簡約客廳臥室空間。'
+            },
+            {
+                id: 'p5',
+                name: '溫潤實木爪磨塔與貓抓板',
+                category: 'cat',
+                categoryName: '貓咪專區',
+                price: 2450,
+                rating: 4.9,
+                reviews: 14,
+                image: 'https://images.unsplash.com/photo-1574158622682-e40e69881006?auto=format&fit=crop&w=800&q=80',
+                description: '白橡實木底座配搭高密度天然劍麻繩，不易掉屑，兼具擺飾美感與耐用度。'
+            },
+            {
+                id: 'p6',
+                name: '極靜音寵物循環活水飲水機',
+                category: 'home',
+                categoryName: '居家美學',
+                price: 1590,
+                rating: 4.8,
+                reviews: 51,
+                image: 'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?auto=format&fit=crop&w=800&q=80',
+                description: '四重過濾淨水技術，超靜音馬達設計運轉音低於 20dB，吸引毛孩多喝水的健康幫手。'
+            },
+            {
+                id: 'p7',
+                name: '大地色系慢食防噎陶瓷碗',
+                category: 'home',
+                categoryName: '居家美學',
+                price: 980,
+                rating: 4.9,
+                reviews: 31,
+                image: 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?auto=format&fit=crop&w=800&q=80',
+                description: '立體幾何迷宮造型，延緩狗狗與貓咪進食速度，保護腸胃健康。霧面奶茶色防滑設計。'
+            },
+            {
+                id: 'p8',
+                name: '人寵共用寵物友善大豆香氛蠟燭',
+                category: 'home',
+                categoryName: '居家美學',
+                price: 860,
+                rating: 5.0,
+                reviews: 22,
+                image: 'https://images.unsplash.com/photo-1603006905003-be475563bc59?auto=format&fit=crop&w=800&q=80',
+                description: '100% 天然大豆蠟與無毒精油，去除室內寵物異味，不含酒精與有害化學成分，安全舒緩空間。'
+            },
+            {
+                id: 'p9',
+                name: '日系高彈力可拆洗寵物小沙發 Bed',
+                category: 'dog',
+                categoryName: '狗狗專區',
+                price: 3200,
+                rating: 4.9,
+                reviews: 18,
+                image: 'https://images.unsplash.com/photo-1583511655826-05700d52f4d9?auto=format&fit=crop&w=800&q=80',
+                description: '仿沙發扶手包覆感設計，採用防水防刮厚布料，輕鬆拆洗不褪色，給予寵物媲美人類的休息品質。'
+            },
+            {
+                id: 'p10',
+                name: '手作羊毛氈貓草造型啃咬組',
+                category: 'cat',
+                categoryName: '貓咪專區',
+                price: 490,
+                rating: 4.8,
+                reviews: 64,
+                image: 'https://images.unsplash.com/photo-1545249390-6bdfa286032f?auto=format&fit=crop&w=800&q=80',
+                description: '填充有機貓薄荷與木天蓼粉，純手工羊毛氈縫製，紓解毛孩焦慮與無聊時光的紓壓好物。'
+            },
+            {
+                id: 'p11',
+                name: '極簡多功能便攜式外出背包',
+                category: 'dog',
+                categoryName: '狗狗專區',
+                price: 2880,
+                rating: 4.7,
+                reviews: 27,
+                image: 'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=800&q=80',
+                description: '透氣大網窗與隱密遮光簾雙重設計，減壓肩帶設計減輕飼主負擔，搭乘大眾運輸輕鬆出行。'
+            },
+            {
+                id: 'p12',
+                name: '鼠尾草綠莫蘭迪防潑水寵物雨衣',
+                category: 'dog',
+                categoryName: '狗狗專區',
+                price: 1350,
+                rating: 4.9,
+                reviews: 16,
+                image: 'https://images.unsplash.com/photo-1535930891776-0c2dfb7fda1a?auto=format&fit=crop&w=800&q=80',
+                description: '透氣防水面料與反光邊條設計，兼具下雨天外出實用性與拍照的高質感時尚穿搭。'
+            }
+        ];
+
+        // --- 2. Application State ---
+        let cart = [];
+        let favorites = new Set();
+        let currentCategory = 'all';
+
+        // --- 3. DOM Ready Initialization ---
+        window.addEventListener('DOMContentLoaded', () => {
+            renderProducts();
+            initAnimations();
+            
+            // Scroll Back to top button listener
+            window.addEventListener('scroll', () => {
+                const btn = document.getElementById('back-to-top');
+                if (window.scrollY > 300) {
+                    btn.classList.remove('opacity-0', 'pointer-events-none');
+                } else {
+                    btn.classList.add('opacity-0', 'pointer-events-none');
+                }
+            });
+        });
+
+        // --- 4. Page SPA Navigation ---
+        function navigateTo(pageId) {
+            const sections = document.querySelectorAll('.page-section');
+            const target = document.getElementById(`page-${pageId}`);
+            
+            sections.forEach(sec => {
+                if (sec === target) {
+                    sec.classList.remove('hidden');
+                    gsap.fromTo(sec, { opacity: 0, y: 15 }, { opacity: 1, y: 0, duration: 0.4, ease: 'power2.out' });
+                } else {
+                    sec.classList.add('hidden');
+                }
+            });
+
+            // Update Nav active style
+            document.querySelectorAll('.nav-link').forEach(link => {
+                const href = link.getAttribute('href').replace('#', '');
+                if (href === pageId) {
+                    link.classList.add('text-sage');
+                    link.classList.remove('text-espresso/70');
+                } else {
+                    link.classList.remove('text-sage');
+                    link.classList.add('text-espresso/70');
+                }
+            });
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // --- 5. Render Products ---
+        function renderProducts() {
+            const grid = document.getElementById('product-grid');
+            if (!grid) return;
+
+            const filtered = currentCategory === 'all' 
+                ? productsData 
+                : productsData.filter(p => p.category === currentCategory);
+
+            grid.innerHTML = filtered.map(product => {
+                const isFav = favorites.has(product.id);
+                return `
+                    <div class="product-card group bg-cream rounded-3xl overflow-hidden border border-milk-tea shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between">
+                        <div>
+                            <div class="relative aspect-square overflow-hidden bg-sand cursor-pointer" onclick="openProductModal('${product.id}')">
+                                <img src="${product.image}" alt="${product.name}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                                <button onclick="event.stopPropagation(); toggleFavorite('${product.id}')" aria-label="收藏" class="absolute top-4 right-4 w-9 h-9 rounded-full bg-cream/80 backdrop-blur hover:bg-cream flex items-center justify-center text-espresso transition-colors">
+                                    <i class="${isFav ? 'fa-solid text-red-500' : 'fa-regular'} fa-heart"></i>
+                                </button>
+                            </div>
+                            <div class="p-5 space-y-2">
+                                <div class="flex items-center gap-1 text-amber-500 text-xs font-semibold">
+                                    <i class="fa-solid fa-star"></i>
+                                    <span>${product.rating}</span>
+                                    <span class="text-espresso/40">(${product.reviews})</span>
+                                </div>
+                                <h3 onclick="openProductModal('${product.id}')" class="font-bold text-base text-espresso line-clamp-1 hover:text-sage transition-colors cursor-pointer">${product.name}</h3>
+                                <p class="text-xs text-espresso/60 line-clamp-2 leading-relaxed">${product.description}</p>
+                            </div>
+                        </div>
+                        <div class="p-5 pt-0 border-t border-milk-tea/40 mt-3 flex items-center justify-between">
+                            <span class="font-serif text-lg font-bold text-espresso">NT$ ${product.price.toLocaleString()}</span>
+                            <button onclick="addToCart('${product.id}', this)" class="px-4 py-2.5 rounded-full bg-sand hover:bg-milk-tea text-espresso font-bold text-xs flex items-center gap-2 transition-all shadow-sm active:scale-95">
+                                <i class="fa-solid fa-cart-shopping text-espresso"></i> 加入購物車
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // --- 6. Category Filtering ---
+        function filterProducts(cat) {
+            currentCategory = cat;
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('bg-espresso', 'text-cream');
+                btn.classList.add('bg-sand', 'text-espresso');
+            });
+            event.target.classList.remove('bg-sand', 'text-espresso');
+            event.target.classList.add('bg-espresso', 'text-cream');
+            renderProducts();
+        }
+
+        // --- 7. Favorites Handling ---
+        function toggleFavorite(id) {
+            if (favorites.has(id)) {
+                favorites.delete(id);
+                showToast('已取消收藏');
+            } else {
+                favorites.add(id);
+                showToast('已加入我的收藏');
+            }
+            updateFavCount();
+            renderProducts();
+        }
+
+        function updateFavCount() {
+            const countEl = document.getElementById('fav-count');
+            countEl.innerText = favorites.size;
+            if (favorites.size > 0) {
+                countEl.classList.remove('opacity-0', 'scale-0');
+            } else {
+                countEl.classList.add('opacity-0', 'scale-0');
+            }
+        }
+
+        function openFavoritesModal() {
+            const listContainer = document.getElementById('favorites-list');
+            
+            if (favorites.size === 0) {
+                listContainer.innerHTML = `
+                    <div class="text-center py-10 text-espresso/40 space-y-3">
+                        <i class="fa-regular fa-heart text-4xl"></i>
+                        <p class="text-sm">您目前尚未收藏任何商品喔！</p>
+                    </div>
+                `;
+            } else {
+                const favProducts = productsData.filter(p => favorites.has(p.id));
+                listContainer.innerHTML = favProducts.map(p => `
+                    <div class="flex items-center gap-4 bg-sand/40 p-3 rounded-2xl border border-milk-tea/40 justify-between">
+                        <div class="flex items-center gap-3 cursor-pointer" onclick="openProductModal('${p.id}'); closeFavoritesModal()">
+                            <img src="${p.image}" alt="${p.name}" class="w-14 h-14 rounded-xl object-cover">
+                            <div>
+                                <h4 class="text-xs font-bold text-espresso line-clamp-1 hover:text-sage">${p.name}</h4>
+                                <p class="text-xs font-serif text-espresso/70 mt-1">NT$ ${p.price.toLocaleString()}</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="addToCart('${p.id}', this)" class="px-3 py-1.5 rounded-full bg-sand hover:bg-milk-tea text-espresso font-bold text-[11px] flex items-center gap-1.5 shadow-sm transition-all">
+                                <i class="fa-solid fa-cart-shopping"></i> 加購物車
+                            </button>
+                            <button onclick="toggleFavorite('${p.id}'); openFavoritesModal()" class="text-red-500 hover:text-espresso p-1.5 text-sm" title="移除收藏">
+                                <i class="fa-solid fa-heart"></i>
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            const modal = document.getElementById('favorites-modal');
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+        }
+
+        function closeFavoritesModal() {
+            const modal = document.getElementById('favorites-modal');
+            modal.classList.add('opacity-0', 'pointer-events-none');
+        }
+
+        // --- 8. Cart Management ---
+        function addToCart(productId, btnElement) {
+            const product = productsData.find(p => p.id === productId);
+            if (!product) return;
+
+            const existing = cart.find(item => item.id === productId);
+            if (existing) {
+                existing.quantity += 1;
+            } else {
+                cart.push({ ...product, quantity: 1 });
+            }
+
+            // Interactive Button Animation
+            if (btnElement) {
+                const origHTML = btnElement.innerHTML;
+                btnElement.innerHTML = `<i class="fa-solid fa-check text-espresso"></i> 已加入！`;
+                btnElement.classList.add('bg-sage-light');
+                gsap.fromTo(btnElement, { scale: 0.9 }, { scale: 1, duration: 0.3, ease: 'back.out(2)' });
+                setTimeout(() => {
+                    btnElement.innerHTML = origHTML;
+                    btnElement.classList.remove('bg-sage-light');
+                }, 1200);
+            }
+
+            updateCartUI();
+            showToast(`「${product.name}」已加入購物車`);
+        }
+
+        function updateCartQuantity(id, change) {
+            const item = cart.find(i => i.id === id);
+            if (item) {
+                item.quantity += change;
+                if (item.quantity <= 0) {
+                    cart = cart.filter(i => i.id !== id);
+                }
+            }
+            updateCartUI();
+        }
+
+        function updateCartUI() {
+            // Count badge
+            const totalCount = cart.reduce((acc, i) => acc + i.quantity, 0);
+            const countEl = document.getElementById('cart-count');
+            countEl.innerText = totalCount;
+            if (totalCount > 0) {
+                countEl.classList.remove('opacity-0', 'scale-0');
+            } else {
+                countEl.classList.add('opacity-0', 'scale-0');
+            }
+
+            // Items List
+            const itemsContainer = document.getElementById('cart-items');
+            if (cart.length === 0) {
+                itemsContainer.innerHTML = `
+                    <div class="text-center py-12 text-espresso/40 space-y-3">
+                        <i class="fa-solid fa-basket-shopping text-4xl"></i>
+                        <p class="text-sm">購物車目前沒有商品</p>
+                    </div>
+                `;
+            } else {
+                itemsContainer.innerHTML = cart.map(item => `
+                    <div class="flex items-center gap-4 bg-sand/40 p-3 rounded-2xl border border-milk-tea/40">
+                        <img src="${item.image}" alt="${item.name}" class="w-16 h-16 rounded-xl object-cover">
+                        <div class="flex-grow">
+                            <h4 class="text-xs font-bold text-espresso line-clamp-1">${item.name}</h4>
+                            <p class="text-xs font-serif text-espresso/70 mt-1">NT$ ${item.price.toLocaleString()}</p>
+                            <div class="flex items-center gap-3 mt-2">
+                                <button onclick="updateCartQuantity('${item.id}', -1)" class="w-6 h-6 rounded-full bg-cream border border-milk-tea flex items-center justify-center text-xs text-espresso hover:bg-sand">-</button>
+                                <span class="text-xs font-bold text-espresso">${item.quantity}</span>
+                                <button onclick="updateCartQuantity('${item.id}', 1)" class="w-6 h-6 rounded-full bg-cream border border-milk-tea flex items-center justify-center text-xs text-espresso hover:bg-sand">+</button>
+                            </div>
+                        </div>
+                        <button onclick="updateCartQuantity('${item.id}', -${item.quantity})" class="text-espresso/40 hover:text-red-500 text-sm p-1">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                `).join('');
+            }
+
+            // Total price
+            const totalPrice = cart.reduce((acc, i) => acc + (i.price * i.quantity), 0);
+            document.getElementById('cart-total-price').innerText = `NT$ ${totalPrice.toLocaleString()}`;
+        }
+
+        function toggleCartDrawer(open) {
+            const drawer = document.getElementById('cart-drawer');
+            const overlay = document.getElementById('cart-drawer-overlay');
+            if (open) {
+                overlay.classList.remove('opacity-0', 'pointer-events-none');
+                drawer.classList.remove('translate-x-full');
+            } else {
+                overlay.classList.add('opacity-0', 'pointer-events-none');
+                drawer.classList.add('translate-x-full');
+            }
+        }
+
+        function triggerCheckout() {
+            if (cart.length === 0) {
+                showToast('購物車內無商品無法結帳');
+                return;
+            }
+            alert('【前端展示聲明】本功能為前端 UI 示範，尚未串接真實金流。');
+        }
+
+        // --- 9. Modals Logic (Product Detail & Search) ---
+        function openProductModal(id) {
+            const p = productsData.find(item => item.id === id);
+            if (!p) return;
+
+            document.getElementById('modal-img').src = p.image;
+            document.getElementById('modal-category').innerText = p.categoryName;
+            document.getElementById('modal-title').innerText = p.name;
+            document.getElementById('modal-price').innerText = `NT$ ${p.price.toLocaleString()}`;
+            document.getElementById('modal-desc').innerText = p.description;
+
+            const addBtn = document.getElementById('modal-add-btn');
+            addBtn.onclick = () => {
+                addToCart(p.id);
+                closeProductModal();
+            };
+
+            const modal = document.getElementById('product-modal');
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            modal.firstElementChild.classList.remove('scale-95');
+        }
+
+        function closeProductModal() {
+            const modal = document.getElementById('product-modal');
+            modal.classList.add('opacity-0', 'pointer-events-none');
+            modal.firstElementChild.classList.add('scale-95');
+        }
+
+        function openSearchModal() {
+            const modal = document.getElementById('search-modal');
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            document.getElementById('search-input').focus();
+        }
+
+        function closeSearchModal() {
+            const modal = document.getElementById('search-modal');
+            modal.classList.add('opacity-0', 'pointer-events-none');
+        }
+
+        function handleSearch() {
+            const val = document.getElementById('search-input').value.trim().toLowerCase();
+            const resContainer = document.getElementById('search-results');
+            if (!val) {
+                resContainer.innerHTML = '';
+                return;
+            }
+
+            const results = productsData.filter(p => p.name.toLowerCase().includes(val) || p.description.toLowerCase().includes(val));
+            if (results.length === 0) {
+                resContainer.innerHTML = `<p class="text-xs text-espresso/40 text-center py-4">查無符合商品</p>`;
+            } else {
+                resContainer.innerHTML = results.map(p => `
+                    <div onclick="openProductModal('${p.id}'); closeSearchModal()" class="flex items-center gap-3 p-2 rounded-xl hover:bg-sand cursor-pointer">
+                        <img src="${p.image}" class="w-10 h-10 rounded-lg object-cover">
+                        <div>
+                            <p class="text-xs font-bold text-espresso">${p.name}</p>
+                            <p class="text-[10px] text-espresso/60">NT$ ${p.price}</p>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // --- 10. Contact Form & Utility Toast ---
+        function handleContactSubmit(e) {
+            e.preventDefault();
+            showToast('感謝您的訊息！我們將於 24 小時內回覆。');
+            e.target.reset();
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-msg').innerText = msg;
+            toast.classList.remove('translate-x-72', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-x-72', 'opacity-0');
+            }, 3000);
+        }
+
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        }
+
+        // --- 11. GSAP Hero Animations ---
+        function initAnimations() {
+            gsap.from('.hero-title', { opacity: 0, y: 30, duration: 1, ease: 'power3.out' });
+            gsap.from('.hero-desc', { opacity: 0, y: 20, duration: 1, delay: 0.2, ease: 'power3.out' });
+            gsap.from('.hero-btn', { opacity: 0, y: 20, duration: 1, delay: 0.4, ease: 'power3.out' });
+            gsap.from('.hero-img', { scale: 1.1, duration: 1.5, ease: 'power2.out' });
+        }
+    </script>
+</body>
+</html>
